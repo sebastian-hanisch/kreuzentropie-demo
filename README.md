@@ -1,7 +1,6 @@
 # Kreuzentropie: die Hilfsverteilung lernen – Streamlit-Demo
 
-<!-- TODO nach dem Deploy: direkt hierher den Live-Link setzen (Leerzeile davor und danach):
-**[→ Demo live ausprobieren](https://sebastianhanisch-kreuzentropie-demo.streamlit.app/)** -->
+**[→ Demo live ausprobieren](https://sebastianhanisch-kreuzentropie-demo.streamlit.app/)**
 
 Achtes Stück der Linie **„Monte-Carlo-Schätzung und Varianzreduktion“** in der „Konzepte“-Reihe für die Website „Sebastian Hanisch – Operations Research und Machine Learning“ (die Linie wird erst vollständig veröffentlicht). Nachfolger von [importance-sampling-demo](https://github.com/sebastian-hanisch/importance-sampling-demo) (Stück 7, feste Kippung, deren Optimum man nur bei bekannter Struktur kennt). Hier hebt das Stück genau diese Annahme auf: Die Kippung wird **aus den Ziehungen gelernt**. Vehikel ist wie in Stück 1 bis 7 der Ausfall eines Gitternetzes (Ereignis: das Netz hängt **nicht** zusammen), dazu die Hantel. Die Wahrheit ist exakt aufgezählt; verglichen wird bei gleichem Budget mit einfachem Ziehen, dem unbekannten Optimum und **adaptivem Splitting** (das [splitting-demo](https://github.com/sebastian-hanisch/splitting-demo) aus den Warteschlangen nur mit festen Stufen rechnet).
 
@@ -120,4 +119,4 @@ Gebaut mit Streamlit, Plotly, NumPy und fpdf2.
 
 ---
 
-Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zu den Demos: [Interaktive Demos](https://sebastianhanisch.net/demos.html).
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Monte-Carlo-Schätzung: vom Schätzer zur Wahl](https://sebastianhanisch.net/konzepte-monte-carlo.html).
