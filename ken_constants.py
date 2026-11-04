@@ -40,7 +40,7 @@ PRESETS = {
 }
 PRESET_HELP = {
     "Standardfall (Voreinstellung)": "Gitter 3×4, jede Kante fällt mit 1 % aus, 1000 Ziehungen je Stufe, 1 % Elite: das Lernen findet in zwei Stufen eine Kippung, die fast so gut ist wie das unbekannte Optimum.",
-    "Zu große Elite (Fixpunkt-Falle)": "Mit 5 % Elite bleibt die Stufe bei „ein Eckknoten hat nur noch eine Kante“ stehen: q' läuft in einen Zwischen-Fixpunkt und erreicht den Ausfall nie.",
+    "Zu große Elite (Fixpunkt-Falle)": "Mit 5 % Elite bleibt die Stufe bei „ein Eckknoten hat nur noch eine Kante“ stehen: q' läuft in einen Zwischen-Fixpunkt und erreicht den Ausfall nicht.",
     "Noch seltener, zu wenig Treffer": "Bei q = 0,001 und 300 Ziehungen je Stufe sieht die erste Stufe oft keinen Treffer: das Lernen kommt nicht in Gang.",
     "Noch seltener, passende Elite": "Bei q = 0,001 mit 3000 Ziehungen je Stufe und 0,5 % Elite gelingt das Lernen fast immer.",
     "Hantel (ein einziger Schnitt)": "Eine einzige Brücke trennt das Netz: die Bewertungsfunktion hat kaum Zwischenstufen, das Lernen wird kürzer.",

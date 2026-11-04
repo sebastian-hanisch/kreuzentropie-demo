@@ -13,9 +13,9 @@ Importance Sampling braucht eine Hilfsverteilung. Die **Kreuzentropie-Methode** 
 
 Vor dem Bau wurden die Hypothesen der Gliederung an Messreihen geprüft (Vormessung im Website-Repo, `docs/planung/monte-carlo-planung/vormessung/`). Was sich geändert hat:
 
-- **„Wenige Stufen genügen“ stimmt, aber nur mit kleinem ρ.** Mit einer Zahl als Familie genügen **zwei Stufen**; ist ρ größer als die Ausfallwahrscheinlichkeit der Zwischenstufe, läuft q' in einen **Zwischen-Fixpunkt** und erreicht das Ereignis nie. Der Fixpunkt ist exakt vorhersagbar: der Erwartungswert des Updates ist E_q[f | Elite]/m, unabhängig vom aktuellen q'.
+- **„Wenige Stufen genügen“ stimmt, aber nur mit kleinem ρ.** Mit einer Zahl als Familie genügen bei dieser Bewertung (zwei Niveaus) **zwei Stufen**; ist ρ größer als die Ausfallwahrscheinlichkeit unter dem erreichten q' (hier 0,0225), bleibt q' in einem **Zwischen-Fixpunkt** und erreicht das Ereignis nicht (bei ρ = 0,05 in 100 % der Läufe ab N = 1000, bei N = 100 in 62 %). Der Fixpunkt ist aus der Stufenfolge vorhersagbar: das Update ist als Verhältnis der Erwartungswerte bei fester Elite E_q[f | Elite]/m, unabhängig vom aktuellen q' (wegen der datenabhängigen Schwelle nur näherungsweise).
 - **Die erste Stufe braucht Treffer.** Bei q = 0,001 scheitert das Lernen in 56 % der Läufe, wenn die Stufe zu klein ist.
-- **Splitting hinkt hier nicht zufällig hinterher.** Die Bewertung hat nur zwei Niveaus mit den Stufenwahrscheinlichkeiten 0,078 und 0,0054, und der Fehler folgt exakt aus Σ (1 − p_t)/(p_t N).
+- **Splitting hinkt hier nicht zufällig hinterher.** Die Bewertung hat nur zwei Niveaus mit den Stufenwahrscheinlichkeiten 0,078 und 0,0054, und der Fehler folgt in guter Näherung aus Σ (1 − p_t)/(p_t N).
 
 ## Modell
 
@@ -35,8 +35,8 @@ Alle Zahlen stehen in `tests/test_claims.py`. Standardfall: Gitter 3×4, q = 0,0
 | Frage | Befund |
 |---|---|
 | Stufenwahrscheinlichkeiten, 3×4 (exakt) | q = 0,01: P(s ≥ −1) = **0,0776**, danach P(A \| s ≥ −1) = **0,0054**; q = 0,001: **0,0080** und **0,0005** |
-| Exakte Stufenfolge, q = 0,01, ρ = 0,01 | q' = 0,010 → **0,0665** (Niveau −1, Wahrscheinlichkeit 0,0776) → **0,1288** (Niveau 0, Wahrscheinlichkeit 0,0225); optimales q' = 0,1185; das Ereignis wird für ρ bis etwa **0,021** erreicht |
-| Gemessen, Standardfall | **2,0 Stufen**, 2000 Ziehungen, nie festgefahren; gelerntes q' im Median **0,129** (10 bis 90 %: 0,125 bis 0,137); CV² des gelernten q' **1,01-mal** so groß wie beim Optimum |
+| Exakte Stufenfolge, q = 0,01, ρ = 0,01 | q' = 0,010 → **0,0665** (Niveau −1, Wahrscheinlichkeit 0,0776) → **0,1288** (Niveau 0, Wahrscheinlichkeit 0,0225); optimales q' = 0,1185; das Ereignis wird für ρ bis etwa **0,022** erreicht (die Grenze ist die Wahrscheinlichkeit 0,0225 des Ausfalls unter q' = 0,0665; das Raster der App zeigt 0,021) |
+| Gemessen, Standardfall (Bewertung mit zwei Niveaus) | **2,0 Stufen**, 2000 Ziehungen, nie festgefahren; gelerntes q' im Median **0,129** (10 bis 90 %: 0,125 bis 0,137); CV² des gelernten q' **1,01-mal** so groß wie beim Optimum |
 | Fixpunkt-Falle, ρ = 0,05 | exakt: q' = 0,010 → 0,0665 → **0,0665** (Niveau bleibt −1, das Ereignis hat unter 0,0665 nur 0,0225 < ρ); gemessen **100 %** festgefahren |
 | ρ und N je Stufe (q = 0,01, Anteil festgefahrener Läufe, N = 100 / 300 / 1000 / 3000) | ρ = 0,005 und 0,01: **0 / 0 / 0 / 0**; ρ = 0,02: 0,01 / 0 / 0 / 0; ρ = 0,05: **0,62 / 0,98 / 1,00 / 1,00**; ρ = 0,1: 1,00 überall; wo es gelingt, ist das CV²-Verhältnis zum Optimum **1,01 bis 1,02** (eine Ausnahme: 1,25 bei N = 100 und ρ = 0,01) |
 | Noch seltener, q = 0,001 | erste Stufe nur 0,0080: ρ = 0,01 gibt keine Elite (Niveau −2, alle Ziehungen); N = 300, ρ = 0,01: **56 %** festgefahren; N = 3000, ρ = 0,005: **2 %**, q' = 0,119 (Optimum 0,118), Verhältnis 1,00 |
@@ -44,7 +44,7 @@ Alle Zahlen stehen in `tests/test_claims.py`. Standardfall: Gitter 3×4, q = 0,0
 | Gleiches Budget B = 2000 / 6000 / 20 000, q = 0,01, relativer RMSE | einfach **1,09 / 0,62 / 0,36**; Orakel (festes Optimum, nicht lernbar ohne Wissen) **0,20 / 0,11 / 0,06**; **Kreuzentropie 0,25 / 0,15 / 0,07**; adaptives Splitting **0,55 / 0,32 / 0,18** |
 | Dasselbe: Läufe mit mehr als 50 % Fehler, B = 2000 | einfach 65 %, Orakel 2 %, Kreuzentropie 2 %, Splitting 37 % |
 | Gleiches Budget, q = 0,001, B = 20 000 | einfach **3,11** (93 % Nullschätzungen); Orakel 0,07; Kreuzentropie **0,22** (4 % festgefahren, als Null gezählt); Splitting **0,62** (5 % festgefahren) |
-| Vorhersage des Splittings (exakt aus den Stufen, q = 0,01) | relativer Fehler **0,54 / 0,31 / 0,17** bei Budget 2000 / 6000 / 20 000 gegen gemessen 0,55 / 0,32 / 0,18; q = 0,001: Stufen 0,0080 und 0,0005, vorhergesagt 1,78 / 1,03 / 0,56 |
+| Vorhersage des Splittings (in guter Näherung aus den Stufen, q = 0,01) | relativer Fehler **0,54 / 0,31 / 0,17** bei Budget 2000 / 6000 / 20 000 gegen gemessen 0,55 / 0,32 / 0,18; q = 0,001: Stufen 0,0080 und 0,0005, vorhergesagt 1,78 / 1,03 / 0,56 |
 | Vorhersage der Kreuzentropie (exakt, Lernen mit einem Sechstel des Budgets je Stufe) | q = 0,01: **0,25 / 0,14 / 0,08**; q = 0,001, B = 20 000: **0,09** (gemessen 0,22 wegen 4 % festgefahrener Läufe, die als Null zählen) |
 
 ## Ehrliche Grenzen

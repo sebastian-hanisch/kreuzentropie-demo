@@ -83,8 +83,8 @@ st.markdown(
     """
 Importance Sampling (Stück 7) braucht eine **Hilfsverteilung**; die beste Kippung kennt man nur, wenn man den kleinsten Schnitt des Netzes schon kennt. Die **Kreuzentropie-Methode** lernt sie:
 man zieht mit der aktuellen Kippung q', behält die **Elite** (die besten Ziehungen nach einer Bewertungsfunktion), setzt q' auf den **gewichteten Ausfallanteil der Elite** und wiederholt, bis die Elite das Ereignis selbst ist.
-Mit **einer** Zahl als Familie genügen **zwei Stufen**, und das gelernte q' ist beim Varianzquadrat fast so gut wie das Optimum. Aber das Lernen kann **scheitern**: ist die Elite zu groß, läuft q' in einen **Zwischen-Fixpunkt**;
-sieht die erste Stufe keinen Treffer, kommt es gar nicht in Gang. Bei gleichem Budget liegt es dicht hinter dem unbekannten Optimum, weit vor einfachem Ziehen und vor **adaptivem Splitting** auf derselben Bewertung.
+Mit **einer** Zahl als Familie genügen bei dieser Bewertung (zwei Niveaus) **zwei Stufen**, und das gelernte q' ist beim Varianzquadrat fast so gut wie das Optimum. Aber das Lernen kann **scheitern**: ist die Elite zu groß, läuft q' in einen **Zwischen-Fixpunkt**;
+sieht die erste Stufe keinen Treffer, kommt es gar nicht in Gang. Bei gleichem Budget liegt es 20 bis 40 % im Fehler hinter dem unbekannten Optimum, weit vor einfachem Ziehen und bei dieser Bewertung zwei- bis dreimal besser als **adaptives Splitting**.
 
 Weiter unten: **🔬 fünf Experimente**, **🧪 Spielwiese**, **🚧 Wo die Annahmen enden** und die Expander **⚠️ Annahmen, Grenzen und bekannte Probleme** und **📐 Mathematische Formulierung**.
 """
@@ -97,7 +97,7 @@ with st.expander("So funktioniert die Kreuzentropie-Methode", expanded=True):
 2. **Stufe:** N Ziehungen mit der aktuellen Kippung q' (zuerst q). Die Schwelle ist die Bewertung der ⌈ρN⌉-besten Ziehung (höchstens 0); die **Elite** sind alle Ziehungen mit s ≥ Schwelle.
 3. **Update:** q'_neu = Σ W f / (m Σ W) über die Elite, mit f = Zahl der Ausfälle, W = Dichtequotient Original zu q'. Das ist die Maximum-Likelihood-Anpassung der Familie an die Elite. Der Erwartungswert ist **E_q[f | s ≥ Schwelle] / m**, unabhängig vom aktuellen q'.
 4. **Ende:** Sobald die Schwelle 0 ist (die Elite ist der Ausfall selbst), schätzt man mit frischen Ziehungen und dem gelernten q'. **Festgefahren:** alle Ziehungen sind Elite, oder nach 8 Stufen ist die Schwelle noch unter 0.
-5. **Fixpunkt-Falle:** Bleibt der Ausfall unter dem aktuellen q' seltener als ρ, wählt die nächste Stufe wieder dieselbe Schwelle und q' ändert sich nicht mehr. ρ muss unter der Ausfallwahrscheinlichkeit der Zwischenstufe liegen und die erste Stufe braucht mindestens ρN Treffer.
+5. **Fixpunkt-Falle:** Bleibt der Ausfall unter dem aktuellen q' seltener als ρ, wählt die nächste Stufe wieder dieselbe Schwelle und q' ändert sich nicht mehr. ρ muss unter der Ausfallwahrscheinlichkeit unter dem erreichten q' liegen und die erste Stufe braucht mindestens ρN Treffer.
         """
     )
 
@@ -116,7 +116,7 @@ with st.sidebar:
     st.markdown("**Lernen**")
     n = st.select_slider("Ziehungen N je Stufe", options("n_select"), key="n_select", help="Ziehungen je Lernstufe.")
     rho = st.select_slider("Anteil der Elite ρ", options("rho_select"), key="rho_select", format_func=_q_label,
-                           help="Welcher Anteil der Ziehungen die Elite bildet (mit Gleichstand: alle bis zur Schwelle). Kleiner als die Ausfallwahrscheinlichkeit der Zwischenstufe, aber mit mindestens einigen Treffern.")
+                           help="Welcher Anteil der Ziehungen die Elite bildet (mit Gleichstand: alle bis zur Schwelle). Kleiner als die Ausfallwahrscheinlichkeit unter dem erreichten q', aber mit mindestens einigen Treffern.")
     st.markdown("**Vergleich**")
     budget = st.select_slider("Gesamtbudget (Ziehungen)", options("budget_select"), key="budget_select", help="Budget für den Vergleich der vier Verfahren in Experiment 3 (Lernen und Schätzen eingerechnet).")
     seed = st.number_input("Zufallsstrom", *bounds("seed_input"), key="seed_input", step=1, help="Welcher feste Strom von Zufallszahlen benutzt wird (SplitMix64).")
@@ -162,7 +162,7 @@ st.markdown("---")
 # --- Experimente ---------------------------------------------------------------------------------------------------------------------------
 
 st.subheader("🔬 Experiment 1: Lernverlauf")
-st.caption("Die ersten Lernläufe gegen die exakte Stufenfolge (Bild oben). Der Erwartungswert des Updates ist E_q[f | Elite] / m und hängt nur vom Niveau der Elite ab, nicht vom aktuellen q'.")
+st.caption("Die ersten Lernläufe gegen die exakte Stufenfolge (Bild oben). Das Update ist als Verhältnis der Erwartungswerte bei fester Elite E_q[f | Elite] / m und hängt nur vom Niveau der Elite ab, nicht vom aktuellen q'.")
 kind, text = ev.verdict_trajectories(a)
 getattr(st, kind)(text)
 
@@ -288,7 +288,7 @@ with st.expander("📐 Mathematische Formulierung"):
 
 **Kreuzentropie.** Man minimiert die Kreuzentropie zwischen der (unbekannten) optimalen Hilfsverteilung $\propto \mathbf 1_A\,\mathbb P$ und der Familie. Stufenweise mit Elite $E_t = \{x : s(x) \ge \gamma_t\}$:
 $$q'_{t+1} = \frac{\sum_{i \in E_t} W_i f_i}{m \sum_{i \in E_t} W_i},\qquad W_i = \Bigl(\tfrac{q}{q'_t}\Bigr)^{f_i}\Bigl(\tfrac{1-q}{1-q'_t}\Bigr)^{m-f_i}.$$
-Der Erwartungswert dieses Updates ist $\mathbb E_q[f \mid s \ge \gamma_t]/m$ und hängt nicht von $q'_t$ ab; $\gamma_t$ ist die Bewertung der $\lceil \rho N \rceil$-besten Ziehung, höchstens 0.
+Das Update ist als Verhältnis der Erwartungswerte bei fester Elite $\mathbb E_q[f \mid s \ge \gamma_t]/m$ und hängt nicht von $q'_t$ ab (wegen der datenabhängigen Schwelle nur näherungsweise); $\gamma_t$ ist die Bewertung der $\lceil \rho N \rceil$-besten Ziehung, höchstens 0.
 
 **Fixpunkt-Falle.** Unter $q'_t$ hat das Niveau $\ell$ die Wahrscheinlichkeit $\mathbb P_{q'_t}(s \ge \ell)$. Ist $\mathbb P_{q'_t}(A) < \rho$, bleibt $\gamma_{t+1} = \gamma_t < 0$ und $q'_{t+1} = q'_t$: ein Fixpunkt unterhalb des Ereignisniveaus.
 
